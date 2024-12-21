@@ -1,0 +1,56 @@
+
+# HTTP Client Configuration
+
+The **HTTP Client Configuration** in the LPS Tool allows you to customize the HTTP client used for sending requests during tests. Adjustments can be made to connection pooling, timeout settings, and connection limits, optimizing performance and reducing potential bottlenecks.
+
+## Command Usage
+
+```bash
+lps httpclient [options]
+```
+
+## How It Works
+
+1. **Connection Pooling**:  
+   Manage the lifetime and idle timeout of connections in the connection pool to reuse connections efficiently.
+
+2. **Simultaneous Connections**:  
+   Set a limit on the number of simultaneous connections to a server, preventing excessive resource usage.
+
+3. **Timeout Settings**:  
+   Define the maximum time the HTTP client will wait for a request to complete, ensuring that tests do not hang indefinitely.
+
+## Options
+
+### Connection Pooling Options
+- `-pclt`, `--poolConnectionLifeTime <poolConnectionLifeTime>`:  
+  Specifies how long a connection remains in the pool before being discarded.
+
+- `-pcit`, `--poolConnectionIdelTimeout <poolConnectionIdelTimeout>`:  
+  Sets the maximum time a connection can stay idle in the pool.
+
+### Simultaneous Connections
+- `-mcps`, `--maxConnectionsPerServer <maxConnectionsPerServer>`:  
+  Limits the number of simultaneous connections per server.
+
+### Timeout Settings
+- `-cto`, `--clientTimeout <clientTimeout>`:  
+  Sets the timeout for HTTP client requests.
+
+## Additional Resources
+
+To gain a deeper understanding of **Connection Pooling** and how to manage it effectively, refer to the following article:  
+[What is Connection Pooling? and How to Control Connection Pooling?](https://www.stevejgordon.co.uk/httpclient-connection-pooling-in-dotnet-core)
+
+## Example Usage
+
+### Set Maximum Connections Per Server and Client Timeout
+```bash
+lps httpclient -mcps 100 -cto 30
+```
+
+### Configure Connection Pool Life Time and Idle Timeout
+```bash
+lps httpclient -pclt 120 -pcit 15
+```
+

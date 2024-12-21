@@ -1,0 +1,124 @@
+
+# Dashboard in LPS Tool
+
+The **LPS Tool** features a modern and intuitive dashboard designed to help users efficiently monitor and analyze essential metrics for their testing endpoints. This built-in dashboard provides a user-friendly interface for real-time insights into testing performance.
+
+## Key Features
+
+1. **Real-Time Monitoring**:  
+   The dashboard updates dynamically to reflect the current state of testing, displaying essential metrics in an organized and accessible way.
+
+2. **Comprehensive Metrics**:  
+   The dashboard tracks and displays a variety of critical metrics to help users evaluate the performance of their endpoints.
+
+3. **Built-In Configuration**:  
+   The dashboard can be enabled or disabled through the global configuration file (`config/lpsSettings.json`). This flexibility is particularly useful when integrating with DevOps tools or custom workflows.
+
+4. **REST API Support**:  
+   Even when the built-in dashboard is disabled, the REST API remains functional, allowing users to fetch metrics programmatically.
+
+## Metrics Displayed in the Dashboard
+
+### Response Breakdown Metrics
+- **HttpStatusCode**: The status code of HTTP responses (e.g., `200` for success).
+- **HttpStatusReason**: The reason phrase for the status code (e.g., `OK`).
+- **Count**: The number of responses for each status code.
+
+### Response Time Metrics
+- **SumResponseTime**: Total response time for all requests (in milliseconds).
+- **AverageResponseTime**: Average response time for requests (in milliseconds).
+- **MinResponseTime**: Minimum response time recorded (in milliseconds).
+- **MaxResponseTime**: Maximum response time recorded (in milliseconds).
+- **P90ResponseTime**: 90th percentile response time (in milliseconds).
+- **P50ResponseTime**: 50th percentile (median) response time (in milliseconds).
+- **P10ResponseTime**: 10th percentile response time (in milliseconds).
+
+### Connection Metrics
+- **TimeElapsedInMilliseconds**: Total elapsed time of the test (in milliseconds).
+- **RequestsRate**: Rate of requests per second.
+- **RequestsRatePerCoolDownPeriod**: Rate of requests per cooldown periods.
+- **RequestsCount**: Total number of requests sent.
+- **ActiveRequestsCount**: Number of currently active requests.
+- **SuccessfulRequestCount**: Number of successful requests.
+- **FailedRequestsCount**: Number of failed requests.
+
+### Data Transmission Metrics
+- **TimeElapsedInMilliseconds**: Time spent transmitting data (in milliseconds).
+- **DataSent**: Total amount of data sent (in bytes).
+- **DataReceived**: Total amount of data received (in bytes).
+- **AverageDataSent**: Average amount of data sent per request (in bytes).
+- **AverageDataReceived**: Average amount of data received per request (in bytes).
+- **AverageDataSentPerSecond**: Average data sent per second (in bytes per second).
+- **AverageDataReceivedPerSecond**: Average data received per second (in bytes per second).
+- **AverageBytesPerSecond**: Total average data throughput (in bytes per second).
+
+## Configuring the Dashboard
+
+The dashboard can be configured through the `config/lpsSettings.json` file under the `LPSDashboardConfiguration` section. Below is an example configuration:
+
+```json
+"LPSDashboardConfiguration": {
+  "BuiltInDashboard": true,
+  "Port": 8009,
+  "RefreshRate": 5
+}
+```
+
+### Configuration Options
+- **BuiltInDashboard**: Enables (`true`) or disables (`false`) the built-in dashboard.
+- **Port**: Specifies the port on which the dashboard runs (default: `8009`).
+- **RefreshRate**: Determines how often the dashboard refreshes (in seconds).
+
+## Disabling the Dashboard
+The built-in dashboard can be disabled without affecting the REST API. This is useful for scenarios like integrating with DevOps pipelines or running tests in environments where a dashboard UI is not required.
+
+Example:
+```json
+"LPSDashboardConfiguration": {
+  "BuiltInDashboard": false,
+  "Port": 8009,
+  "RefreshRate": 5
+}
+```
+
+## Example Configuration File
+
+```json
+{
+  "LPSAppSettings": {
+    "LPSFileLoggerConfiguration": {
+      "LogFilePath": "logs/lpslog.log",
+      "ConsoleLogingLevel": 1,
+      "EnableConsoleLogging": true,
+      "DisableConsoleErrorLogging": true,
+      "DisableFileLogging": false,
+      "LoggingLevel": 0
+    },
+    "LPSWatchdogConfiguration": {
+      "MaxMemoryMB": 1000,
+      "CoolDownMemoryMB": 700,
+      "MaxCPUPercentage": 70,
+      "CoolDownCPUPercentage": 50,
+      "CoolDownRetryTimeInSeconds": 1,
+      "MaxConcurrentConnectionsCountPerHostName": 3000,
+      "CoolDownConcurrentConnectionsCountPerHostName": 2500,
+      "MaxCoolingPeriod": 60,
+      "ResumeCoolingAfter": 60,
+      "SuspensionMode": 0
+    },
+    "LPSHttpClientConfiguration": {
+      "ClientTimeoutInSeconds": 300,
+      "PooledConnectionLifeTimeInSeconds": 1500,
+      "PooledConnectionIdleTimeoutInSeconds": 350,
+      "MaxConnectionsPerServer": 3000
+    },
+    "LPSDashboardConfiguration": {
+      "BuiltInDashboard": true,
+      "Port": 8009,
+      "RefreshRate": 5
+    }
+  }
+}
+```
+
+The LPS Dashboard is an integral tool for visualizing and analyzing test performance metrics, offering both flexibility and ease of use for testers and developers.
