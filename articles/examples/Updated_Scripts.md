@@ -1,0 +1,88 @@
+
+# Basic Test Scripts
+
+## Example 1: API Health Check
+```yaml
+name: APIHealthCheck
+rounds:
+- name: HealthCheckRound
+  numberOfClients: 1
+  iterations:
+  - name: HealthCheckIteration
+    httpRequest:
+      url: https://api.example.com/health
+      httpMethod: GET
+    mode: R
+    requestCount: 1
+```
+**Run Command**:
+```bash
+lps run APIHealthCheck.yaml
+```
+
+---
+
+## Example 2: Basic POST Request with Inline Payload
+```yaml
+name: BasicPostRequest
+rounds:
+- name: PostRound
+  numberOfClients: 1
+  iterations:
+  - name: PostIteration
+    httpRequest:
+      url: https://api.example.com/create
+      httpMethod: POST
+      payload:
+        raw: '{"name":"John Doe","email":"john.doe@example.com"}'
+    mode: R
+    requestCount: 1
+```
+**Run Command**:
+```bash
+lps run BasicPostRequest.yaml
+```
+
+---
+
+## Example 3: Basic Data Retrieval
+```yaml
+name: DataRetrieval
+rounds:
+- name: DataFetchRound
+  numberOfClients: 1
+  iterations:
+  - name: FetchIteration
+    httpRequest:
+      url: https://api.example.com/data
+      httpMethod: GET
+    mode: R
+    requestCount: 5
+```
+**Run Command**:
+```bash
+lps run DataRetrieval.yaml
+```
+
+---
+
+## Example 4: Basic Load Testing
+```yaml
+name: BasicLoadTest
+rounds:
+- name: LoadTestRound
+  numberOfClients: 5
+  iterations:
+  - name: LoadIteration
+    httpRequest:
+      url: https://api.example.com/load
+      httpMethod: GET
+    mode: R
+    requestCount: 100
+```
+**Run Command**:
+```bash
+lps run BasicLoadTest.yaml
+```
+
+---

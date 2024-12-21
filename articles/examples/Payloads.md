@@ -1,0 +1,84 @@
+
+# Examples of Binary, Multipart, and Raw Payload Handling
+
+### 1. Binary Payload Example
+```yaml
+name: BinaryPayloadExample
+rounds:
+- name: BinaryPayloadRound
+  numberOfClients: 1
+  iterations:
+  - name: BinaryPayloadIteration
+    httpRequest:
+      url: https://api.example.com/upload
+      httpMethod: POST
+      payload:
+        file: ../data/binaryfile.bin
+    mode: R
+    requestCount: 1
+```
+**Purpose**: Sends a binary file as the payload. The type is automatically detected based on the file.
+
+---
+
+### 2. Multipart Payload Example
+```yaml
+name: MultipartPayloadExample
+rounds:
+- name: MultipartPayloadRound
+  numberOfClients: 1
+  iterations:
+  - name: MultipartPayloadIteration
+    httpRequest:
+      url: https://api.example.com/upload
+      httpMethod: POST
+      payload:
+        multipart:
+          fields:
+            - name: field1
+              value: sample value
+              contentType: text/plain
+            - name: field2
+              value: another value
+              contentType: application/json
+          files:
+            - name: file1
+              path: ../data/image.jpg
+              contentType: image/jpeg
+            - name: file2
+              path: ../data/document.pdf
+              contentType: application/pdf
+    mode: R
+    requestCount: 1
+```
+**Purpose**: Demonstrates how to send multipart payloads with both text fields and files.
+
+---
+
+### 3. Raw Payload Example
+```yaml
+name: RawPayloadExample
+rounds:
+- name: RawPayloadRound
+  numberOfClients: 1
+  iterations:
+  - name: RawPayloadIteration
+    httpRequest:
+      url: https://api.example.com/data
+      httpMethod: POST
+      payload:
+        type: Raw
+        raw: |
+          {
+            "key1": "value1",
+            "key2": "value2",
+            "nested": {
+              "key3": "value3"
+            }
+          }
+    mode: R
+    requestCount: 1
+```
+**Purpose**: Sends raw JSON data in the request payload. This is useful for API endpoints requiring structured payloads like JSON or XML.
+
+---

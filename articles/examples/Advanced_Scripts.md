@@ -1,0 +1,106 @@
+
+# Advanced Test Scripts
+
+## Example 1: Using Variables with Dynamic Headers
+```yaml
+name: DynamicHeadersTest
+variables:
+- to: authToken
+  value: "Bearer exampleauthtoken"
+rounds:
+- name: AuthenticatedRound
+  numberOfClients: 1
+  iterations:
+  - name: AuthenticatedRequest
+    httpRequest:
+      url: https://api.example.com/protected
+      httpMethod: GET
+      httpHeaders:
+        Authorization: $authToken
+    mode: R
+    requestCount: 5
+```
+**Run Command**:
+```bash
+lps run DynamicHeadersTest.yaml
+```
+
+---
+
+## Example 2: Paginated Data Retrieval with `loopcounter`
+```yaml
+name: PaginatedDataRetrieval
+rounds:
+- name: PaginationRound
+  numberOfClients: 1
+  iterations:
+  - name: PaginationIteration
+    httpRequest:
+      url: https://api.example.com/data?page=$loopcounter(start=1, end=10)
+      httpMethod: GET
+    mode: R
+    requestCount: 10
+```
+**Run Command**:
+```bash
+lps run PaginatedDataRetrieval.yaml
+```
+
+---
+
+## Example 3: Multipart Form Submission
+```yaml
+name: MultipartFormSubmission
+rounds:
+- name: MultipartRound
+  numberOfClients: 1
+  iterations:
+  - name: FormIteration
+    httpRequest:
+      url: https://api.example.com/submit
+      httpMethod: POST
+      payload:
+        multipart:
+          fields:
+          - name: "username"
+            value: "testuser"
+          - name: "password"
+            value: "password123"
+          files:
+          - name: "profilePicture"
+            path: ../data/profile.jpg
+            contentType: image/jpeg
+    mode: R
+    requestCount: 1
+```
+**Run Command**:
+```bash
+lps run MultipartFormSubmission.yaml
+```
+
+---
+
+## Example 4: Simulating Load with Variable Data
+```yaml
+name: SimulatedLoadTest
+variables:
+- to: userData
+  value: $read(path=../data/users.csv)
+  as: csv
+rounds:
+- name: SimulatedLoadRound
+  numberOfClients: 5
+  iterations:
+  - name: LoadIteration
+    httpRequest:
+      url: https://api.example.com/user/$userData[$loopcounter(start=0, end=49),0]
+      httpMethod: GET
+    mode: R
+    requestCount: 50
+```
+**Run Command**:
+```bash
+lps run SimulatedLoadTest.yaml
+```
+
+---

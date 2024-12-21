@@ -1,0 +1,93 @@
+# LPS Tool Advanced Payload and File Handling Examples
+
+This document demonstrates how to utilize the read utility to design dynamic load patterns
+
+---
+
+## 1. How to Read a CSV File and Use Its Items
+```yaml
+name: ReadCSVExample
+variables:
+- to: csvData
+  value: $read(path=../data/sample.csv)
+  as: csv
+rounds:
+- name: ReadCSVRound
+  numberOfClients: 1
+  iterations:
+  - name: UseCSVItem
+    httpRequest:
+      url: https://api.example.com/resource/$csvData[0,0]
+      httpMethod: GET
+    mode: R
+    requestCount: 1
+```
+**Purpose**: Reads a CSV file and uses the first item (`[0,0]`) in the dataset as part of the URL.
+
+---
+
+## 2. How to Read a CSV File and Use Its Items with `loopcounter`
+```yaml
+name: ReadCSVWithLoopCounter
+variables:
+- to: csvData
+  value: $read(path=../data/sample.csv)
+  as: csv
+rounds:
+- name: CSVLoopCounterRound
+  numberOfClients: 1
+  iterations:
+  - name: UseCSVLoop
+    httpRequest:
+      url: https://api.example.com/resource/$csvData[$loopcounter(start=0, end=9),0]
+      httpMethod: GET
+    mode: R
+    requestCount: 10
+```
+**Purpose**: Uses a `loopcounter` to read a new item from the CSV file for each request, iterates over the first column of each row in the first 10 rows of the CSV file.
+
+---
+
+## 3. How to Read a JSON File and Use Its Items
+```yaml
+name: ReadJSONExample
+variables:
+- to: jsonData
+  value: $read(path=../data/sample.json)
+  as: json
+rounds:
+- name: ReadJSONRound
+  numberOfClients: 1
+  iterations:
+  - name: UseJSONItem
+    httpRequest:
+      url: https://api.example.com/resource/$jsonData.property
+      httpMethod: GET
+    mode: R
+    requestCount: 1
+```
+**Purpose**: Reads a JSON file and uses a property (`property`) in the request.
+
+---
+
+## 4. How to Read an XML File and Use Its Items
+```yaml
+name: ReadXMLExample
+variables:
+- to: xmlData
+  value: $read(path=../data/sample.xml)
+  as: xml
+rounds:
+- name: ReadXMLRound
+  numberOfClients: 1
+  iterations:
+  - name: UseXMLItem
+    httpRequest:
+      url: https://api.example.com/resource/$xmlData/item/subitem
+      httpMethod: GET
+    mode: R
+    requestCount: 1
+```
+**Purpose**: Reads an XML file and accesses nested elements (`item/subitem`) for the request.
+
+---

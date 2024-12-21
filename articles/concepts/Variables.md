@@ -1,0 +1,22 @@
+
+# Using Variables in LPS
+
+Variables enhance the flexibility of test scenarios by allowing dynamic data to be injected into requests. They can be predefined or generated during the test and are useful for:
+- Storing values captured from responses.
+- Referencing external data sources like CSV files or JSON configurations.
+- Creating parameterized test cases.
+
+### Example
+```yaml
+name: variablesTest
+variables:
+- to: responseTime
+  value: $randomnumber(min=100, max=500)
+rounds:
+- name: VariableExampleRound
+  iterations:
+  - name: UseVariable
+    httpRequest:
+      url: https://api.example.com/resource/$responseTime
+      httpMethod: GET
+```
