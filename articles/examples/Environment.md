@@ -1,0 +1,125 @@
+
+# Examples Using Environment Variables
+
+## Example 1: API Testing with Environment-Specific Configurations
+```yaml
+name: APITestWithEnvironments
+variables:
+- name: apiBaseUrl
+  value: https://staging.api.example.com
+- name: timeout
+  value: 30
+environments:
+- name: production
+  variables:
+  - name: apiBaseUrl
+    value: https://api.example.com
+  - name: timeout
+    value: 60
+- name: development
+  variables:
+  - name: apiBaseUrl
+    value: https://dev.api.example.com
+  - name: timeout
+    value: 15
+rounds:
+- name: APIRound
+  numberOfClients: 2
+  iterations:
+  - name: FetchUserData
+    httpRequest:
+      url: $apiBaseUrl/users
+      httpMethod: GET
+      httpHeaders:
+        X-Timeout: $timeout
+    mode: R
+    requestCount: 5
+```
+**Run Command**:
+```bash
+lps run APITestWithEnvironments.yaml --environment production
+```
+```bash
+lps run APITestWithEnvironments.yaml --environment development
+```
+
+---
+
+## Example 2: Secure API Calls with Token-Based Authentication
+```yaml
+name: SecureAPIExample
+variables:
+- name: apiToken
+  value: $read(path=../secrets/prod-token.txt)
+- name: username
+  value: admin
+environments:
+- name: staging
+  variables:
+  - name: apiToken
+    value: $read(path=../secrets/staging-token.txt)
+  - name: username
+    value: staging-user
+- name: development
+  variables:
+  - name: apiToken
+    value: $read(path=../secrets/dev-token.txt)
+  - name: username
+    value: dev-user
+rounds:
+- name: SecureRound
+  numberOfClients: 1
+  iterations:
+  - name: FetchSecureData
+    httpRequest:
+      url: https://secure.api.example.com/data
+      httpMethod: GET
+      httpHeaders:
+        Authorization: Bearer $apiToken
+        Username: $username
+    mode: R
+    requestCount: 3
+```
+**Run Command**:
+```bash
+lps run SecureAPIExample.yaml --environment staging
+```
+```bash
+lps run SecureAPIExample.yaml --environment development
+```
+
+---
+
+## Example 3: Testing Across Multiple Environments with Dynamic Endpoints
+```yaml
+name: MultiEnvDynamicTest
+variables:
+- name: baseUrl
+  value: https://staging.service.example.com/api
+  environments:
+  - name: production
+    variables:
+    - name: baseUrl
+      value: https://service.example.com/api
+  - name: development
+    variables:
+    - name: baseUrl
+      value: https://dev.service.example.com/api
+rounds:
+- name: DynamicEnvRound
+  numberOfClients: 3
+  iterations:
+  - name: FetchResource
+    httpRequest:
+      url: $baseUrl/resources/$loopcounter(start=1, end=50)
+      httpMethod: GET
+    mode: R
+    requestCount: 10
+```
+**Run Command**:
+```bash
+lps run MultiEnvDynamicTest.yaml --environment production
+```
+```bash
+lps run MultiEnvDynamicTest.yaml --environment development
+```
