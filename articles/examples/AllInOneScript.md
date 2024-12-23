@@ -1,0 +1,98 @@
+
+# Complex Example: Demonstrating Multiple Capabilities of the LPS Tool
+
+```yaml
+name: ComplexLPSExample
+variables:
+- name: baseUrl
+  value: https://api.example.com
+- name: tokenEndpoint
+  value: ${baseUrl}/auth/token
+- name: userEndpoint
+  value: ${baseUrl}/users
+- name: secureEndpoint
+  value: ${baseUrl}/secure-data
+- name: clientId
+  value: client123
+- name: clientSecret
+  value: $hash(value=secret123, algorithm=SHA256)
+- name: csvData
+  value: $read(path=C:/Users/Hassan/Downloads/sample-csv-files-sample4.csv)
+  as: csv
+rounds:
+- name: AuthenticationRound
+  numberOfClients: 1
+  iterations:
+  - name: FetchToken
+    httpRequest:
+      url: $tokenEndpoint
+      httpMethod: POST
+      payload:
+        raw: '{"client_id": "$clientId", "client_secret": "$clientSecret"}'
+      capture:
+        to: accessToken
+        regex: '"access_token":"([^"]+)"'
+        makeGlobal: true
+      httpHeaders:
+        Content-Type: application/json
+    mode: R
+    requestCount: 1
+- name: UserFetchRound
+  numberOfClients: 2
+  arrivalDelay: 500
+  runInParallel: true
+  iterations:
+  - name: GetUsers
+    httpRequest:
+      url: ${userEndpoint}/$csvData[$loopcounter(start=0, end=2),0]
+      httpMethod: GET
+      httpHeaders:
+        Authorization: Bearer $accessToken
+        X-Client-ID: $clientId
+    mode: R
+    requestCount: 10
+- name: SecureDataRound
+  numberOfClients: 1
+  iterations:
+  - name: FetchSecureData
+    httpRequest:
+      url: $secureEndpoint
+      httpMethod: GET
+      httpHeaders:
+        Authorization: Bearer $accessToken
+      capture:
+        to: secureData
+        makeGlobal: true
+    mode: R
+    requestCount: 1
+  - name: UseSecureData
+    httpRequest:
+      url: $secureEndpoint/action
+      httpMethod: POST
+      payload:
+        raw: "Action initiated with: $secureData"
+      httpHeaders:
+        Authorization: Bearer $accessToken
+    mode: R
+    requestCount: 1
+environments:
+- name: production
+  variables:
+  - name: baseUrl
+    value: https://prod.api.example.com
+  - name: clientId
+    value: prodClient
+  - name: clientSecret
+    value: $hash(value=prodSecret, algorithm=SHA256)
+```
+
+**Purpose**:
+- Demonstrates multiple rounds with distinct functionalities (authentication, user data fetching, and secure data handling).
+- Captures responses and headers to reuse in subsequent requests.
+- Uses variables for dynamic values and flexibility.
+- Leverages methods like `hash`, `loopcounter`, and `read` to showcase advanced capabilities.
+
+**Run Command**:
+```bash
+lps run ComplexLPSExample.yaml --environment production
+```
