@@ -16,7 +16,7 @@ The LPS Tool is your all-in-one solution for ensuring application reliability an
 - You can now utilize the lps command from any directory.
 
 ## Related Items
-   - [Commands](https://github.com/mohaidr/lps-docs/blob/main/articles/Commands.md)
+   - [Commands](https://github.com/mohaidr/lps-docs/blob/main/articles/1.Commands.md)
    - [Articles](https://github.com/mohaidr/lps-docs/tree/main/articles)
-   - [Concepts](https://github.com/mohaidr/lps-docs/tree/main/articles/concepts)
-   - [Examples](https://github.com/mohaidr/lps-docs/tree/main/articles/examples)
+   - [Concepts](https://github.com/mohaidr/lps-docs/tree/main/concepts)
+   - [Examples](https://github.com/mohaidr/lps-docs/tree/main/examples)
