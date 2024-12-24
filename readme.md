@@ -1,3 +1,5 @@
+> **Warning:** This documentation is applicable starting from version 2.0_Preview of the LPS tool. For documentation on earlier versions, please refer to the `readme.md` files located within each version's directory on our [repository](https://github.com/mohaidr/lps-tool/tree/main/Version). Please note that this version is not backward compatible.
+
 # Introduction
 
 The **LPS Tool** (Load, Performance, and Stress Testing Command Tool) is a versatile and powerful framework designed for evaluating the performance and resilience of web applications under simulated load conditions. By leveraging HTTP-based tests, the tool enables users to assess system behavior, scalability, and endurance with precision.
