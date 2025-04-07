@@ -18,6 +18,8 @@ That’s how the **LPS structure** came to life:
 
 Each one of these components plays a role:
 
+<img src="https://github.com/user-attachments/assets/6796d879-6319-432d-a0e4-c122ec2272d3" width="400" />
+
 ---
 
 ## 👥 Clients
