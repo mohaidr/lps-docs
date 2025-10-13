@@ -14,7 +14,7 @@ How **straight forward** to acheive this using the tools you know? No that **str
 ✨ So I thought: what if I could build a tool that gives you **full control with a simple structure**?
 
 That’s how the **LPS structure** came to life:  
-**Clients + Rounds + Iterations + Iteration Modes + Termination Rules (coming soon)**
+**Clients + Rounds + Iterations + Iteration Modes + Termination Rules**
 
 Each one of these components plays a role:
 
@@ -55,11 +55,10 @@ Each mode gives you a different load shape — **with zero scripting**.
 
 ---
 
-## ⏹️ Termination Rules (coming soon!)
+## ⏹️ Termination Rules
 This will complete the picture.  
 You’ll be able to say things like:
-- “Stop the test if error rate reaches 5%”  
-- “Stop if no response is received within 10 seconds”
+- “Stop the test if error rate reaches 5% for 3 seconds in a row - This feature enable you to define what status codes are considered error status codes”  
 
 That means your tests will become **smart, dynamic, and outcome-aware — not just time-based**.
 
