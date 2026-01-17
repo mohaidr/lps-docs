@@ -34,5 +34,5 @@ lps influxdb -ie true -iu "<InfluxDB_URL>" -it "<Your-Token>" -io "<ORG>" -ib "<
 
 ## See your metrics
 
-To view your metrics, you can either import the [Grafana Dashboard Template](/LPS%20Grafana%20%20Dashboard.json) to quickly set up a pre-configured Grafana dashboard, or run custom queries directly within InfluxDB.
+To view your metrics, you can either import the [Grafana Dashboard Template](https://github.com/mohaidr/lps-docs/blob/main/grafana/LPS%20Grafana%20%20Dashboard.json) to quickly set up a pre-configured Grafana dashboard, or run custom queries directly within InfluxDB.
 
