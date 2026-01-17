@@ -93,13 +93,18 @@
               "options": {
                 "Cancelled": {
                   "color": "red",
-                  "index": 4,
+                  "index": 3,
                   "text": "Cancelled"
                 },
                 "Failed": {
                   "color": "red",
                   "index": 1,
                   "text": "Failed"
+                },
+                "Skipped": {
+                  "color": "red",
+                  "index": 4,
+                  "text": "Skipped"
                 },
                 "Success": {
                   "color": "green",
@@ -108,7 +113,7 @@
                 },
                 "Terminated": {
                   "color": "red",
-                  "index": 3,
+                  "index": 2,
                   "text": "Terminated"
                 }
               },
@@ -1771,13 +1776,13 @@
     ]
   },
   "time": {
-    "from": "now-5m",
+    "from": "now-15m",
     "to": "now"
   },
   "timepicker": {},
   "timezone": "browser",
   "title": "LPS  Dashboard Modern",
   "uid": "lps-metrics-modern",
-  "version": 17,
+  "version": 18,
   "weekStart": ""
 }
