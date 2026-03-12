@@ -47,38 +47,6 @@ lps --version
 
 ---
 
-## 🖥️ Manual Installation (Optional)
-
-If you prefer manual setup:
-
-1. ⬇️ Download the latest version from the [Versions Directory](https://github.com/mohaidr/lps-tool/tree/main/Version)  
-2. 📂 Save it to your desired directory  
-3. 🧩 Ensure [.NET 8 Runtime](https://dotnet.microsoft.com/en-us/download/dotnet/8.0) is installed  
-
----
-
-## ⚙️ Environment Setup (Only for Manual Install)
-
-### 🪟 On Windows:
-- Open **Terminal as Administrator**
-- Run the `env.ps1` script  
-- If execution is restricted:
-  ```powershell
-  Set-ExecutionPolicy Unrestricted
-  ```
-  Restore it later with:
-  ```powershell
-  Set-ExecutionPolicy Restricted
-  ```
-
-### 🐧 On Linux/macOS:
-Run in terminal:
-```bash
-source ./env.sh
-```
-
----
-
 ✨ **That’s it!** You’re ready to start load testing with **LPS Tool**.
 
 ---
