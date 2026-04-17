@@ -41,7 +41,15 @@ lps --version
 
 # ⚡ Quick Test Examples
 
-### 1️⃣ Simple GET Request
+### 1️⃣ Ramp up 1000 clients gradually
+```bash
+lps --url https://www.example.com --numberofclients 1000 --arrivaldelay 100
+```
+📎 **Starts 1000 clients gradually** with a 100 ms delay between client arrivals
+
+---
+
+### 2️⃣ Simple GET Request
 ```bash
 lps --url https://www.example.com -rc 1000
 ```
@@ -49,7 +57,7 @@ lps --url https://www.example.com -rc 1000
 
 ---
 
-### 2️⃣ POST Request with Inline Payload
+### 3️⃣ POST Request with Inline Payload
 ```bash
 lps --url https://www.example.com -rc 1000 --httpmethod "POST" --payload "Inline Payload"
 ```
@@ -57,7 +65,7 @@ lps --url https://www.example.com -rc 1000 --httpmethod "POST" --payload "Inline
 
 ---
 
-### 3️⃣ POST Request with File Payload
+### 4️⃣ POST Request with File Payload
 ```bash
 lps --url https://www.example.com -rc 1000 --httpmethod "POST" --payload "Path:C:\Users\User\Desktop\LPS\urnice.json"
 ```
@@ -65,7 +73,7 @@ lps --url https://www.example.com -rc 1000 --httpmethod "POST" --payload "Path:C
 
 ---
 
-### 4️⃣ POST Request with Payload URL
+### 5️⃣ POST Request with Payload URL
 ```bash
 lps --url https://www.example.com -rc 1000 --httpmethod "POST" --payload "URL:https://www.example.com/payload"
 ```
@@ -96,7 +104,7 @@ Explore full docs in the [📖 LPS Docs Repo](https://github.com/mohaidr/lps-doc
 # 🚨 Important Notice
 
 > **⚠️ Warning:** This documentation applies **only** to **version 2.0_Preview** and above of the **LPS Tool**.
-> For earlier versions, please visit the [`readme.md`](https://github.com/mohaidr/lps-tool/tree/main/Version) in each version's directory.
+> For earlier versions, please visit the [`readme.md`](https://github.com/mohaidr/lps/tree/main/Version) in each version's directory.
 > 
 > ⚠️ **Note:** Version **2.x is NOT backward compatible** with 1.x.
 
