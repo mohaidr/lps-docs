@@ -116,6 +116,7 @@ Cumulative request counts and rates.
 | Field | Type | Description |
 |-------|------|-------------|
 | `requests_count` | int | Total number of requests |
+| `skipped_count` | int | Number of skipped requests |
 | `successful_count` | int | Number of successful requests |
 | `failed_count` | int | Number of failed requests |
 | `max_concurrent_requests` | int | Maximum concurrent requests observed |
@@ -134,9 +135,16 @@ Request counts per cooldown window.
 | Field | Type | Description |
 |-------|------|-------------|
 | `requests_count` | int | Requests in this window |
+| `skipped_count` | int | Skipped requests in this window |
 | `successful_count` | int | Successful requests in this window |
 | `failed_count` | int | Failed requests in this window |
 | `max_concurrent_requests` | int | Max concurrent requests in this window |
+
+**Skipped Ratio Formula (derived):**
+
+`SkipRatio = skipped_count / (requests_count + skipped_count)`
+
+Use this formula when you need skipped request ratio in custom Influx/Grafana queries.
 
 ---
 
