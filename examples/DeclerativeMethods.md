@@ -43,6 +43,7 @@ expression can reuse what an earlier one stored — perfect for showing these me
 | `$strcat` | `values`, `separator`, `variable` | joins values into one string |
 | `$hmac` | `value`, `key`, `algorithm`, `encoding`, `variable` | keyed HMAC digest (hex/base64) |
 | `$jwtsign` | `claims`, `key`, `algorithm`, `expiresIn`, `variable` | signed compact JWT |
+| `$findxml` | `source`, `path`, `where`, `select`, `match`, `variable` | XPath filter/project over XML |
 
 ---
 
@@ -425,3 +426,62 @@ rounds:
 
 > `$jwtsign` currently signs with the symmetric `HS256`/`HS384`/`HS512` algorithms. It adds `iat`
 > automatically and derives `exp` from `expiresIn`, without overriding any claim you set yourself.
+
+---
+
+## Filtering XML — findxml
+
+`$find` works on JSON; `$findxml` is its XPath counterpart for **XML** captures. It selects nodes
+with `path`, filters with an XPath `where` predicate, and projects a value with a relative `select`
+path — using the same `match` modes as `find` (`first` | `last` | `index:N` | `count` | `all`).
+
+```yaml
+name: FindXmlDemo
+rounds:
+  - name: FeatureRound
+    numberOfClients: 1
+    arrivalDelay: 1000
+    runInParallel: false
+    iterations:
+      - name: getOrders
+        httpRequest:
+          capture:
+            to: orders
+            as: Xml
+            makeGlobal: true
+          url: https://example.com/api/orders.xml
+          method: GET
+
+      - name: process
+        # captured `orders` looks like:
+        #   <orders>
+        #     <order kind="online"><id>1</id><status>shipped</status><total>150</total></order>
+        #     <order kind="store"><id>2</id><status>pending</status><total>50</total></order>
+        #     <order kind="online"><id>3</id><status>shipped</status><total>300</total></order>
+        #   </orders>
+        before:
+          # first shipped order's id -> 1
+          - '$findxml(source=$orders.Body, path=/orders/order, where=status="shipped", select=id, match=first, variable=firstShippedId)'
+          # last shipped order's total -> 300
+          - '$findxml(source=$orders.Body, path=/orders/order, where=status="shipped", select=total, match=last, variable=lastShippedTotal)'
+          # 2nd order with total>100 (0-based) -> id 3
+          - '$findxml(source=$orders.Body, path=/orders/order, where=total>100, select=id, match=index:1, variable=secondBig)'
+          # how many are shipped -> 2
+          - '$findxml(source=$orders.Body, path=/orders/order, where=status="shipped", match=count, variable=shippedCount)'
+          # every shipped id -> ["1","3"]
+          - '$findxml(source=$orders.Body, path=/orders/order, where=status="shipped", select=id, match=all, variable=shippedIds)'
+          # attribute filter + attribute projection -> "online"
+          - '$findxml(source=$orders.Body, path=/orders/order, where=@kind="online", select=@kind, match=first, variable=firstKind)'
+          # no match -> default
+          - '$findxml(source=$orders.Body, path=/orders/order, where=status="cancelled", select=id, match=first, default=NONE, variable=cancelledId)'
+        httpRequest:
+          headers:
+            X-First-Shipped: '${firstShippedId}'
+            X-Shipped-Count: '${shippedCount}'
+          url: https://example.com/api/next
+          method: GET
+```
+
+> Write XPath string literals in `where`/`select` with **double quotes** (`status="shipped"`) so the
+> single‑quoted YAML expression is not broken. XML namespaces are not supported yet, and external
+> entities are disabled (XXE‑safe).
