@@ -416,9 +416,11 @@ rounds:
             - '$jwtsign(claims={"iss":"${clientId}","sub":"${clientId}","aud":"${tokenUrl}"}, key=${signingKey}, algorithm=HS256, expiresIn=300, variable=assertion)'
           url: '${tokenUrl}'
           method: POST
+          headers:
+            Content-Type: application/x-www-form-urlencoded
           payload:
-            grant_type: urn:ietf:params:oauth:grant-type:jwt-bearer
-            assertion: '${assertion}'
+            type: Raw
+            raw: 'grant_type=urn:ietf:params:oauth:grant-type:jwt-bearer&assertion=${assertion}'
 ```
 
 > `$jwtsign` currently signs with the symmetric `HS256`/`HS384`/`HS512` algorithms. It adds `iat`
