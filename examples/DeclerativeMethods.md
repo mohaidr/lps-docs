@@ -23,6 +23,8 @@ expression can reuse what an earlier one stored — perfect for showing these me
 | Method | Parameters | Result |
 |---|---|---|
 | `$setvariable` (alias `$set`) | `variable`, `value`, `as` | stores `value` (typed) |
+| `$setvariableif` (alias `$setif`) | `variable`, `condition`, `value`, `default`, `as` | conditional typed store |
+| `$readif` | `condition`, `source`/`path`/`name`/`encoding`, `default`, `as`, `variable` | conditional read |
 | `$sum` | `source`, `variable`, `as` | a + b + c … |
 | `$min` / `$max` | `source`, `variable`, `as` | smallest / largest |
 | `$multiply` | `source`, `variable`, `as` | a × b × c … |
@@ -68,6 +70,77 @@ rounds:
           headers:
             X-Greeting: '${greeting}'
             X-Retries: '${retries}'
+          url: https://jsonplaceholder.typicode.com/posts/1
+          method: GET
+```
+
+### Arithmetic in numeric values
+
+When `as` is numeric (`int`, `double`, `decimal`, …), `value` is evaluated as an **arithmetic expression**
+before it is stored — so `2+3` stores `5`, not the text `"2+3"`. Division is integer for whole operands
+(`10/4` → `2`); use `10.0/4` (or `1.5+1`) for `2.5`. Placeholders resolve first, so `${a}+${b}` computes
+from the resolved numbers. Without a numeric `as`, the value is stored **verbatim**.
+
+```yaml
+before:
+  - '$set(variable=total, value=2+3, as=int)'          # 5
+  - '$set(variable=area, value=${w}*${h}, as=int)'      # e.g. 4*3 -> 12
+  - '$set(variable=ratio, value=10.0/4, as=double)'     # 2.5
+  - '$set(variable=literal, value=2+3)'                 # "2+3" (string, not evaluated)
+```
+
+---
+
+## Conditional set — `setvariableif` / `setif`
+
+`$setvariableif` stores `value` when `condition` is true and `default` when it is false; with no `default`, a
+false condition leaves the variable **untouched**. `$setif` is a shorthand alias. `condition` uses the
+same Flee syntax as `skipIf`, and a numeric `as` evaluates arithmetic in `value`/`default`.
+
+```yaml
+name: SetVariableIfDemo
+rounds:
+  - name: FeatureRound
+    numberOfClients: 1
+    iterations:
+      - name: prepare
+        before:
+          # pick a tier from a captured total
+          - '$setvariableif(variable=tier, condition=${order.total} > 100, value=premium, default=standard)'
+          # set a page size only when it is missing (otherwise leave it as-is)
+          - '$setif(variable=pageSize, condition="${pageSize}" == "", value=20, as=int)'
+          # conditional arithmetic: charge double unless a discount is active
+          - '$setvariableif(variable=charge, condition=${discount} == 0, value=${price}*2, default=${price}, as=double)'
+        httpRequest:
+          headers:
+            X-Tier: '${tier}'
+          url: https://jsonplaceholder.typicode.com/posts/1
+          method: GET
+```
+
+---
+
+## Conditional read — `readif`
+
+`$readif` is the conditional form of `$read`: when `condition` is true it reads from a file, environment
+variable, or another variable and stores the result; when false it stores `default` (or leaves the variable
+untouched). Only the taken branch runs, so a skipped read never touches the file system.
+
+```yaml
+name: ReadIfDemo
+rounds:
+  - name: FeatureRound
+    numberOfClients: 1
+    iterations:
+      - name: prepare
+        before:
+          # read the overrides file only when the flag is on; default to {} otherwise
+          - '$readif(condition=${useOverrides} == true, source=file, path=../data/overrides.json, as=json, variable=overrides, default={})'
+          # pull a token from the environment only in CI
+          - '$readif(condition="${env}" == "ci", source=env, name=API_TOKEN, variable=token)'
+        httpRequest:
+          headers:
+            Authorization: 'Bearer ${token}'
           url: https://jsonplaceholder.typicode.com/posts/1
           method: GET
 ```
