@@ -4,6 +4,11 @@ These declarative methods let you compute values **without** writing Flee expres
 invoked as `$name(args)`, takes named parameters (`key=value`, comma‑separated), and — like the
 other declarative methods — accepts an optional `variable=` to store its result for later use.
 
+> **Variable scope (`isGlobal`):** every method that stores a variable accepts `isGlobal`, and it
+> defaults to **`false`** — the stored variable is scoped to the **current session**, so parallel
+> virtual clients don't share or overwrite each other's value (the same scoping as `capture` and
+> `counter`). Pass `isGlobal=true` to store it **globally**, shared across all sessions.
+
 Most examples below use the **`before`** hook: a list of expressions that run **before** an
 iteration's/request's `skipIf`, URL, and headers. Because `before` is an ordered list, a later
 expression can reuse what an earlier one stored — perfect for showing these methods in action.
@@ -15,6 +20,7 @@ expression can reuse what an earlier one stored — perfect for showing these me
 > - Numeric results are stored **typed**: whole numbers as integers, otherwise doubles
 >   (`divide` and `average` are always doubles). Override with `as=int|double|decimal|bool|string|json`.
 > - Comparison methods return the string `"true"`/`"false"`.
+> - Every stored variable defaults to **session scope**; add `isGlobal=true` to store it globally.
 
 ---
 
