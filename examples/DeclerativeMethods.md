@@ -50,8 +50,8 @@ expression can reuse what an earlier one stored — perfect for showing these me
 | `$stringequals` | `a`, `b`, `ignoreCase`, `variable` | bool string equality |
 | `$strcat` | `values`, `separator`, `variable` | joins values into one string |
 | `$hmac` | `value`, `key`, `algorithm`, `encoding`, `variable` | keyed HMAC digest (hex/base64) |
-| `$jwtsign` | `claims`, `key`, `algorithm`, `expiresIn`, `variable` | signed compact JWT |
-| `$findxml` | `source`, `path`, `where`, `select`, `match`, `variable` | XPath filter/project over XML |
+| `$jwtsign` | `claims`, `key` \| `source`/`path`/`name`, `algorithm`, `expiresIn`, `variable` | signed compact JWT (HS/RS/ES) |
+| `$findxml` | `source`, `path`, `where`, `select`, `match`, `namespaces`, `ignoreNamespaces`, `variable` | XPath filter/project over XML |
 
 ---
 
@@ -455,8 +455,11 @@ rounds:
 ## Signing & tokens — hmac, jwtsign
 
 `$hmac` produces a keyed signature (e.g. a webhook signature header); `$jwtsign` mints a signed
-JWT (e.g. for an OAuth JWT‑bearer flow). Both resolve `${...}` placeholders in their inputs, and
-both pair well with `$read(source=env, ...)` so secrets stay out of the YAML.
+JWT (e.g. for an OAuth JWT‑bearer flow). Both resolve `${...}` placeholders in their inputs. The
+signing key can be supplied inline via `key=`, or — so secrets stay out of the YAML — loaded from a
+**file** (`path=`), an **environment variable** (`source=env, name=`), or a **stored variable**
+(`source=variable, name=`), exactly the way `$read` loads values. When any of `source`/`path`/`name`
+is present it takes precedence over an inline `key`.
 
 ### hmac — webhook signature header
 
@@ -479,7 +482,7 @@ rounds:
           method: POST
 ```
 
-### jwtsign — RFC 7523 JWT‑bearer OAuth flow
+### jwtsign — RFC 7523 JWT‑bearer OAuth flow (HS256, key from env)
 
 ```yaml
 name: JwtBearerDemo
@@ -492,8 +495,8 @@ rounds:
       - name: getToken
         httpRequest:
           before:
-            - '$setvariable(variable=signingKey, value=$read(source=env, name=JWT_SIGNING_KEY))'
-            - '$jwtsign(claims={"iss":"${clientId}","sub":"${clientId}","aud":"${tokenUrl}"}, key=${signingKey}, algorithm=HS256, expiresIn=300, variable=assertion)'
+            # HMAC secret read straight from $env:JWT_SIGNING_KEY — nothing sensitive in the YAML.
+            - '$jwtsign(claims={"iss":"${clientId}","sub":"${clientId}","aud":"${tokenUrl}"}, source=env, name=JWT_SIGNING_KEY, algorithm=HS256, expiresIn=300, variable=assertion)'
           url: '${tokenUrl}'
           method: POST
           headers:
@@ -503,8 +506,70 @@ rounds:
             raw: 'grant_type=urn:ietf:params:oauth:grant-type:jwt-bearer&assertion=${assertion}'
 ```
 
-> `$jwtsign` currently signs with the symmetric `HS256`/`HS384`/`HS512` algorithms. It adds `iat`
-> automatically and derives `exp` from `expiresIn`, without overriding any claim you set yourself.
+Set the secret before the run (PowerShell): `$env:JWT_SIGNING_KEY = "super-secret-hmac-key"`.
+
+### jwtsign — asymmetric RS256 with a private‑key file
+
+```yaml
+name: JwtBearerRs256Demo
+rounds:
+  - name: FeatureRound
+    numberOfClients: 1
+    arrivalDelay: 1000
+    runInParallel: false
+    iterations:
+      - name: getToken
+        httpRequest:
+          before:
+            # RSA private key (PEM) loaded from disk; the header alg becomes RS256.
+            - '$jwtsign(claims={"iss":"${clientId}","sub":"${clientId}","aud":"${tokenUrl}"}, path=./keys/private.pem, algorithm=RS256, expiresIn=300, variable=assertion)'
+          url: '${tokenUrl}'
+          method: POST
+          headers:
+            Content-Type: application/x-www-form-urlencoded
+          payload:
+            type: Raw
+            raw: 'grant_type=urn:ietf:params:oauth:grant-type:jwt-bearer&assertion=${assertion}'
+```
+
+Generate a test key with:
+`openssl genpkey -algorithm RSA -pkeyopt rsa_keygen_bits:2048 -out ./keys/private.pem`.
+
+### jwtsign — key from a stored variable
+
+Load the key once into a plan variable (here from disk, but it could come from an `environments:`
+override), then reference it by name with `source=variable`:
+
+```yaml
+name: JwtBearerVariableDemo
+variables:
+  - name: privatePem
+    value: $read(path=./keys/private.pem)
+rounds:
+  - name: FeatureRound
+    numberOfClients: 1
+    arrivalDelay: 1000
+    runInParallel: false
+    iterations:
+      - name: getToken
+        httpRequest:
+          before:
+            - '$jwtsign(claims={"iss":"${clientId}","sub":"${clientId}","aud":"${tokenUrl}"}, source=variable, name=privatePem, algorithm=RS256, expiresIn=300, variable=assertion)'
+          url: '${tokenUrl}'
+          method: POST
+          headers:
+            Content-Type: application/x-www-form-urlencoded
+          payload:
+            type: Raw
+            raw: 'grant_type=urn:ietf:params:oauth:grant-type:jwt-bearer&assertion=${assertion}'
+```
+
+> `$jwtsign` signs with symmetric `HS256`/`HS384`/`HS512` (an inline or loaded secret) and
+> asymmetric `RS256`/`RS384`/`RS512` and `ES256`/`ES384`/`ES512` (a PEM private key). The key may be
+> inline (`key=`), from a file (`path=`), an env var (`source=env, name=`), or a stored variable
+> (`source=variable, name=`) — a `source`/`path`/`name` takes precedence over an inline `key`. It
+> adds `iat` automatically and derives `exp` from `expiresIn`, without overriding any claim you set
+> yourself. Encrypted PEM keys aren't supported yet.
 
 ---
 
@@ -561,6 +626,49 @@ rounds:
           method: GET
 ```
 
+### Namespaced XML (incl. SOAP)
+
+XPath 1.0 treats an unprefixed name as *no namespace*, so a document that declares an `xmlns` won't
+match a bare `/orders/order`. Two options: declare prefixes with `namespaces=prefix=uri;…` and use
+them in your XPath, or set `ignoreNamespaces=true` to strip namespaces so unprefixed XPath matches.
+
+```yaml
+name: FindXmlNamespacesDemo
+rounds:
+  - name: FeatureRound
+    numberOfClients: 1
+    arrivalDelay: 1000
+    runInParallel: false
+    iterations:
+      - name: getSoap
+        httpRequest:
+          capture:
+            to: soap
+            as: Xml
+            makeGlobal: true
+          url: https://example.com/api/orders.soap.xml
+          method: GET
+
+      - name: process
+        # captured `soap` looks like:
+        #   <s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/">
+        #     <s:Body>
+        #       <o:order xmlns:o="urn:shop:orders"><o:id>1</o:id><o:status>shipped</o:status></o:order>
+        #     </s:Body>
+        #   </s:Envelope>
+        before:
+          # Declare the prefixes, then use them in path/where/select.
+          - '$findxml(source=$soap.Body, namespaces=s=http://schemas.xmlsoap.org/soap/envelope/;o=urn:shop:orders, path=/s:Envelope/s:Body/o:order, where=o:status="shipped", select=o:id, match=first, variable=shippedId)'
+          # Or ignore namespaces entirely and use plain, unprefixed XPath.
+          - '$findxml(source=$soap.Body, ignoreNamespaces=true, path=/Envelope/Body/order, where=status="shipped", select=id, match=first, variable=shippedIdPlain)'
+        httpRequest:
+          headers:
+            X-Shipped-Id: '${shippedId}'
+          url: https://example.com/api/next
+          method: GET
+```
+
 > Write XPath string literals in `where`/`select` with **double quotes** (`status="shipped"`) so the
-> single‑quoted YAML expression is not broken. XML namespaces are not supported yet, and external
-> entities are disabled (XXE‑safe).
+> single‑quoted YAML expression is not broken. XML namespaces are supported two ways — declare
+> prefixes with `namespaces=prefix=uri;…` and use them in your XPath, or set `ignoreNamespaces=true`
+> to strip them so unprefixed XPath matches (handy for SOAP). External entities are disabled (XXE‑safe).
