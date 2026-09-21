@@ -24,8 +24,8 @@ You can now install the **LPS Tool** directly from **NuGet** as a global .NET CL
 dotnet tool install --global lps
 ```
 
-✅ **Requirements:**  
-Make sure you have [.NET 8 SDK or Runtime](https://dotnet.microsoft.com/en-us/download/dotnet/8.0) installed on your machine.
+✅ **Requirement:**  
+Install the [.NET 8 SDK](https://dotnet.microsoft.com/en-us/download/dotnet/8.0) before installing LPS as a global tool.
 
 After installation, you can run LPS from anywhere using:
 
