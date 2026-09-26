@@ -147,4 +147,12 @@ git -C lps-dashboard diff bf3f231 c871cc1 -- src/views
 git -C lps-docs show --stat HEAD
 ```
 
-For a source rebuild, build the dashboard first as documented in the main README. Stop processes using the normal output before rebuilding it. Building to an isolated `OutDir` alone does not update an already running UI or the normal CLI binaries.
+### Packaging Correction After These Commits
+
+Main LPS follow-up: `1d772a2` on `feature/sequential-clients-finalization-ui`.
+
+The source-build prerequisite described above was incorrect for users. The follow-up packages the workspace and live dashboards from the shared `Apis/wwwroot` assets, including the previously ignored entry page and current runtime bundles. Installed users only run `lps ui`; Node.js, npm, a dashboard checkout, and a frontend build are not required. Source builds also use the bundled assets directly. Rebuilding the frontend is a maintainer task only when changing it.
+
+Verified using a clean source snapshot without `lps-dashboard`: package build and isolated tool installation succeeded, all 409 .NET tests passed, and the installed `lps ui` served its assets and rendered Editor and History without Node/npm on PATH or a `--webroot` override. The package build reported 161 warnings and no errors; the browser retained existing Google Maps loading/key warnings. The user's running UI was not restarted. These follow-up changes are not included in the commit IDs above.
+
+Stop processes using the normal output before rebuilding it. Building to an isolated `OutDir` alone does not update an already running UI or the normal CLI binaries.
