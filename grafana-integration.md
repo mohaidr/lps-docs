@@ -1,7 +1,7 @@
 # Integrating LPS with Grafana
 
 LPS exports test metrics to InfluxDB. Grafana reads those metrics and displays
-the six linked dashboards provided in [resources](resources/).
+the six linked dashboards provided in the [resources folder](https://github.com/mohaidr/lps-docs/tree/main/resources).
 
 > **Version compatibility:** These templates apply to the current LPS preview
 > release, **3.0.6.82-preview**. Earlier versions may not export all metrics
@@ -26,12 +26,12 @@ target, and time range.
 
 | Template | Contents |
 | --- | --- |
-| [Requests](resources/lps-requests.json) | Request counts, rate, concurrency, traffic activity, and watchdog intervals |
-| [Latency](resources/lps-latency.json) | Windowed and cumulative response times, percentiles, and timing breakdown |
-| [Server Latency](resources/lps-server.json) | Server processing time and database, cache, and application components |
-| [Data Transfer](resources/lps-transfer.json) | Bytes sent and received, windowed bandwidth, and cumulative average bandwidth |
-| [Responses](resources/lps-responses.json) | HTTP status codes, distribution, and totals |
-| [Performance Report](resources/lps-report.json) | Timing, request, and transfer summary tables |
+| [Requests](https://raw.githubusercontent.com/mohaidr/lps-docs/main/resources/lps-requests.json) | Request counts, rate, concurrency, traffic activity, and watchdog intervals |
+| [Latency](https://raw.githubusercontent.com/mohaidr/lps-docs/main/resources/lps-latency.json) | Windowed and cumulative response times, percentiles, and timing breakdown |
+| [Server Latency](https://raw.githubusercontent.com/mohaidr/lps-docs/main/resources/lps-server.json) | Server processing time and database, cache, and application components |
+| [Data Transfer](https://raw.githubusercontent.com/mohaidr/lps-docs/main/resources/lps-transfer.json) | Bytes sent and received, windowed bandwidth, and cumulative average bandwidth |
+| [Responses](https://raw.githubusercontent.com/mohaidr/lps-docs/main/resources/lps-responses.json) | HTTP status codes, distribution, and totals |
+| [Performance Report](https://raw.githubusercontent.com/mohaidr/lps-docs/main/resources/lps-report.json) | Timing, request, and transfer summary tables |
 
 Each view includes common summary tiles. The templates use Grafana's built-in
 panels and InfluxDB data source; no additional panel plugins are needed.
@@ -107,7 +107,7 @@ runs. Node.js is not required for manual template imports or LPS metrics export.
 
 ## Start a Separate Local Stack
 
-For a new installation, keep [grafana](grafana/) and [resources](resources/) as
+For a new installation, keep [grafana](https://github.com/mohaidr/lps-docs/tree/main/grafana) and [resources](https://github.com/mohaidr/lps-docs/tree/main/resources) as
 sibling folders. Copy both folders, but exclude the generated `grafana/.env`
 credentials and `grafana/.local` verification artifacts. Start with fresh Docker
 volumes; copying templates alone does not migrate an existing database.
@@ -162,7 +162,7 @@ Docker installation, LPS installation, or imported templates of their own.
 The bundled stack deliberately binds both ports to `127.0.0.1` and enables
 anonymous Grafana viewing for local use only. Before allowing LAN access:
 
-1. In [compose.yaml](grafana/compose.yaml), replace the localhost bindings with
+1. In [compose.yaml](https://github.com/mohaidr/lps-docs/blob/main/grafana/compose.yaml), replace the localhost bindings with
    the server's trusted LAN address. For example, use `192.168.1.50:3300:3000`
    for Grafana and `192.168.1.50:8087:8086` for InfluxDB.
 2. Set `GF_AUTH_ANONYMOUS_ENABLED` to `"false"`, use strong credentials, and
@@ -221,4 +221,4 @@ rerun `node grafana/start-local.mjs` to regenerate and reload provisioning;
 changed Compose mounts may require recreating the Grafana container.
 
 For fixture checks, an optional real loopback test, and the measurement schema,
-see [InfluxDB setup and metrics reference](grafana/setup%20influxDB.md).
+see [InfluxDB setup and metrics reference](https://github.com/mohaidr/lps-docs/blob/main/grafana/setup%20influxDB.md).
