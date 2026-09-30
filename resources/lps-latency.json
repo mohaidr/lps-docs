@@ -1,0 +1,1199 @@
+{
+  "id": null,
+  "uid": "lps-latency",
+  "title": "LPS / Latency",
+  "tags": [
+    "LPS",
+    "Performance"
+  ],
+  "timezone": "browser",
+  "schemaVersion": 39,
+  "version": 1,
+  "editable": true,
+  "graphTooltip": 1,
+  "refresh": "5s",
+  "time": {
+    "from": "now-30m",
+    "to": "now"
+  },
+  "timepicker": {
+    "refresh_intervals": [
+      "5s",
+      "10s",
+      "30s",
+      "1m"
+    ]
+  },
+  "links": [
+    {
+      "title": "Requests",
+      "type": "link",
+      "url": "/d/lps-requests",
+      "includeVars": true,
+      "keepTime": true,
+      "targetBlank": false,
+      "asDropdown": false
+    },
+    {
+      "title": "Latency",
+      "type": "link",
+      "url": "/d/lps-latency",
+      "includeVars": true,
+      "keepTime": true,
+      "targetBlank": false,
+      "asDropdown": false
+    },
+    {
+      "title": "Server Latency",
+      "type": "link",
+      "url": "/d/lps-server",
+      "includeVars": true,
+      "keepTime": true,
+      "targetBlank": false,
+      "asDropdown": false
+    },
+    {
+      "title": "Data Transfer",
+      "type": "link",
+      "url": "/d/lps-transfer",
+      "includeVars": true,
+      "keepTime": true,
+      "targetBlank": false,
+      "asDropdown": false
+    },
+    {
+      "title": "Responses",
+      "type": "link",
+      "url": "/d/lps-responses",
+      "includeVars": true,
+      "keepTime": true,
+      "targetBlank": false,
+      "asDropdown": false
+    },
+    {
+      "title": "Performance Report",
+      "type": "link",
+      "url": "/d/lps-report",
+      "includeVars": true,
+      "keepTime": true,
+      "targetBlank": false,
+      "asDropdown": false
+    }
+  ],
+  "templating": {
+    "list": [
+      {
+        "name": "datasource",
+        "label": "Data source",
+        "type": "datasource",
+        "query": "influxdb",
+        "current": {
+          "text": "LPS InfluxDB",
+          "value": "lps-influxdb"
+        },
+        "refresh": 1,
+        "options": []
+      },
+      {
+        "name": "bucket",
+        "label": "Bucket",
+        "type": "textbox",
+        "query": "LPS_Metrics",
+        "current": {
+          "text": "LPS_Metrics",
+          "value": "LPS_Metrics"
+        },
+        "options": []
+      },
+      {
+        "name": "plan_name",
+        "label": "Run",
+        "type": "query",
+        "datasource": {
+          "type": "influxdb",
+          "uid": "${datasource}"
+        },
+        "refresh": 2,
+        "sort": 2,
+        "multi": false,
+        "includeAll": false,
+        "options": [],
+        "current": {},
+        "query": "import \"influxdata/influxdb/schema\"\nschema.tagValues(bucket: ${bucket:doublequote}, tag: \"plan_name\", start: v.timeRangeStart, stop: v.timeRangeStop,\n  predicate: (r) => r._measurement == \"cumulative_requests\")"
+      },
+      {
+        "name": "round_name",
+        "label": "Round",
+        "type": "query",
+        "datasource": {
+          "type": "influxdb",
+          "uid": "${datasource}"
+        },
+        "refresh": 2,
+        "sort": 1,
+        "multi": false,
+        "includeAll": false,
+        "options": [],
+        "current": {},
+        "query": "import \"influxdata/influxdb/schema\"\nschema.tagValues(bucket: ${bucket:doublequote}, tag: \"round_name\", start: v.timeRangeStart, stop: v.timeRangeStop,\n  predicate: (r) => r._measurement == \"cumulative_requests\" and r.plan_name == ${plan_name:doublequote})"
+      },
+      {
+        "name": "iteration_name",
+        "label": "Iteration",
+        "type": "query",
+        "datasource": {
+          "type": "influxdb",
+          "uid": "${datasource}"
+        },
+        "refresh": 2,
+        "sort": 1,
+        "multi": false,
+        "includeAll": false,
+        "options": [],
+        "current": {},
+        "query": "import \"influxdata/influxdb/schema\"\nschema.tagValues(bucket: ${bucket:doublequote}, tag: \"iteration_name\", start: v.timeRangeStart, stop: v.timeRangeStop,\n  predicate: (r) => r._measurement == \"cumulative_requests\" and r.plan_name == ${plan_name:doublequote} and r.round_name == ${round_name:doublequote})"
+      },
+      {
+        "name": "target",
+        "label": "Target",
+        "type": "query",
+        "datasource": {
+          "type": "influxdb",
+          "uid": "${datasource}"
+        },
+        "refresh": 2,
+        "sort": 1,
+        "multi": false,
+        "includeAll": false,
+        "options": [],
+        "current": {},
+        "query": "import \"influxdata/influxdb/schema\"\nschema.tagValues(bucket: ${bucket:doublequote}, tag: \"target\", start: v.timeRangeStart, stop: v.timeRangeStop,\n  predicate: (r) => r._measurement == \"cumulative_requests\" and r.plan_name == ${plan_name:doublequote} and r.round_name == ${round_name:doublequote} and r.iteration_name == ${iteration_name:doublequote})"
+      }
+    ]
+  },
+  "panels": [
+    {
+      "id": 1,
+      "title": "Total requests",
+      "type": "stat",
+      "datasource": {
+        "type": "influxdb",
+        "uid": "${datasource}"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 0,
+        "w": 6,
+        "h": 3
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "${datasource}"
+          },
+          "query": "from(bucket: ${bucket:doublequote})\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"cumulative_requests\")\n  |> filter(fn: (r) => r.plan_name == ${plan_name:doublequote})\n  |> filter(fn: (r) => r.round_name == ${round_name:doublequote})\n  |> filter(fn: (r) => r.iteration_name == ${iteration_name:doublequote})\n  |> filter(fn: (r) => r.target == ${target:doublequote})\n  |> filter(fn: (r) => r._field == \"requests_count\")\n  |> last()\n  |> keep(columns: [\"_time\", \"_value\", \"_field\"])"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "locale",
+          "noValue": "No data",
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "#22d3ee"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "decimals": 0
+        },
+        "overrides": []
+      },
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "value",
+        "justifyMode": "auto",
+        "orientation": "horizontal",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "wideLayout": true
+      }
+    },
+    {
+      "id": 2,
+      "title": "Average response",
+      "type": "stat",
+      "datasource": {
+        "type": "influxdb",
+        "uid": "${datasource}"
+      },
+      "gridPos": {
+        "x": 6,
+        "y": 0,
+        "w": 6,
+        "h": 3
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "${datasource}"
+          },
+          "query": "from(bucket: ${bucket:doublequote})\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"cumulative_duration\")\n  |> filter(fn: (r) => r.plan_name == ${plan_name:doublequote})\n  |> filter(fn: (r) => r.round_name == ${round_name:doublequote})\n  |> filter(fn: (r) => r.iteration_name == ${iteration_name:doublequote})\n  |> filter(fn: (r) => r.target == ${target:doublequote})\n  |> filter(fn: (r) => r._field == \"avg\")\n  |> filter(fn: (r) => r.metric == \"total_time\")\n  |> last()\n  |> keep(columns: [\"_time\", \"_value\", \"_field\"])"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ms",
+          "noValue": "No data",
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "#22d3ee"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "decimals": 2
+        },
+        "overrides": []
+      },
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "value",
+        "justifyMode": "auto",
+        "orientation": "horizontal",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "wideLayout": true
+      }
+    },
+    {
+      "id": 3,
+      "title": "Successful",
+      "type": "stat",
+      "datasource": {
+        "type": "influxdb",
+        "uid": "${datasource}"
+      },
+      "gridPos": {
+        "x": 12,
+        "y": 0,
+        "w": 6,
+        "h": 3
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "${datasource}"
+          },
+          "query": "from(bucket: ${bucket:doublequote})\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"cumulative_requests\")\n  |> filter(fn: (r) => r.plan_name == ${plan_name:doublequote})\n  |> filter(fn: (r) => r.round_name == ${round_name:doublequote})\n  |> filter(fn: (r) => r.iteration_name == ${iteration_name:doublequote})\n  |> filter(fn: (r) => r.target == ${target:doublequote})\n  |> filter(fn: (r) => r._field == \"successful_count\")\n  |> last()\n  |> keep(columns: [\"_time\", \"_value\", \"_field\"])"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "locale",
+          "noValue": "No data",
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "#50d199"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "decimals": 0
+        },
+        "overrides": []
+      },
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "value",
+        "justifyMode": "auto",
+        "orientation": "horizontal",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "wideLayout": true
+      }
+    },
+    {
+      "id": 4,
+      "title": "Failed",
+      "type": "stat",
+      "datasource": {
+        "type": "influxdb",
+        "uid": "${datasource}"
+      },
+      "gridPos": {
+        "x": 18,
+        "y": 0,
+        "w": 6,
+        "h": 3
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "${datasource}"
+          },
+          "query": "from(bucket: ${bucket:doublequote})\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"cumulative_requests\")\n  |> filter(fn: (r) => r.plan_name == ${plan_name:doublequote})\n  |> filter(fn: (r) => r.round_name == ${round_name:doublequote})\n  |> filter(fn: (r) => r.iteration_name == ${iteration_name:doublequote})\n  |> filter(fn: (r) => r.target == ${target:doublequote})\n  |> filter(fn: (r) => r._field == \"failed_count\")\n  |> last()\n  |> keep(columns: [\"_time\", \"_value\", \"_field\"])"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "locale",
+          "noValue": "No data",
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "#f87171"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "decimals": 0
+        },
+        "overrides": []
+      },
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "value",
+        "justifyMode": "auto",
+        "orientation": "horizontal",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "wideLayout": true
+      }
+    },
+    {
+      "id": 5,
+      "title": "Error rate",
+      "type": "stat",
+      "datasource": {
+        "type": "influxdb",
+        "uid": "${datasource}"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 3,
+        "w": 6,
+        "h": 3
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "${datasource}"
+          },
+          "query": "from(bucket: ${bucket:doublequote})\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"cumulative_requests\")\n  |> filter(fn: (r) => r.plan_name == ${plan_name:doublequote})\n  |> filter(fn: (r) => r.round_name == ${round_name:doublequote})\n  |> filter(fn: (r) => r.iteration_name == ${iteration_name:doublequote})\n  |> filter(fn: (r) => r.target == ${target:doublequote})\n  |> filter(fn: (r) => r._field == \"requests_count\" or r._field == \"failed_count\")\n  |> last()\n  |> pivot(rowKey: [\"_time\"], columnKey: [\"_field\"], valueColumn: \"_value\")\n  |> map(fn: (r) => ({_time: r._time, _field: \"error_rate\", _value: if r.requests_count > 0 then float(v: r.failed_count) / float(v: r.requests_count) else 0.0}))"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
+          "noValue": "No data",
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "#f87171"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "decimals": 2,
+          "min": 0,
+          "max": 1
+        },
+        "overrides": []
+      },
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "value",
+        "justifyMode": "auto",
+        "orientation": "horizontal",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "wideLayout": true
+      }
+    },
+    {
+      "id": 6,
+      "title": "Received",
+      "type": "stat",
+      "datasource": {
+        "type": "influxdb",
+        "uid": "${datasource}"
+      },
+      "gridPos": {
+        "x": 6,
+        "y": 3,
+        "w": 6,
+        "h": 3
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "${datasource}"
+          },
+          "query": "from(bucket: ${bucket:doublequote})\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"cumulative_data_transfer\")\n  |> filter(fn: (r) => r.plan_name == ${plan_name:doublequote})\n  |> filter(fn: (r) => r.round_name == ${round_name:doublequote})\n  |> filter(fn: (r) => r.iteration_name == ${iteration_name:doublequote})\n  |> filter(fn: (r) => r.target == ${target:doublequote})\n  |> filter(fn: (r) => r._field == \"data_received\")\n  |> last()\n  |> keep(columns: [\"_time\", \"_value\", \"_field\"])"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "bytes",
+          "noValue": "No data",
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "#22d3ee"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "value",
+        "justifyMode": "auto",
+        "orientation": "horizontal",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "wideLayout": true
+      }
+    },
+    {
+      "id": 7,
+      "title": "Peak concurrency",
+      "type": "stat",
+      "datasource": {
+        "type": "influxdb",
+        "uid": "${datasource}"
+      },
+      "gridPos": {
+        "x": 12,
+        "y": 3,
+        "w": 6,
+        "h": 3
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "${datasource}"
+          },
+          "query": "from(bucket: ${bucket:doublequote})\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"cumulative_requests\")\n  |> filter(fn: (r) => r.plan_name == ${plan_name:doublequote})\n  |> filter(fn: (r) => r.round_name == ${round_name:doublequote})\n  |> filter(fn: (r) => r.iteration_name == ${iteration_name:doublequote})\n  |> filter(fn: (r) => r.target == ${target:doublequote})\n  |> filter(fn: (r) => r._field == \"max_concurrent_requests\")\n  |> last()\n  |> keep(columns: [\"_time\", \"_value\", \"_field\"])"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "locale",
+          "noValue": "No data",
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "#f59e0b"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "decimals": 0
+        },
+        "overrides": []
+      },
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "value",
+        "justifyMode": "auto",
+        "orientation": "horizontal",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "wideLayout": true
+      }
+    },
+    {
+      "id": 8,
+      "title": "Final status",
+      "type": "stat",
+      "datasource": {
+        "type": "influxdb",
+        "uid": "${datasource}"
+      },
+      "gridPos": {
+        "x": 18,
+        "y": 3,
+        "w": 6,
+        "h": 3
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "${datasource}"
+          },
+          "query": "from(bucket: ${bucket:doublequote})\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"iteration_final_status\")\n  |> filter(fn: (r) => r.plan_name == ${plan_name:doublequote})\n  |> filter(fn: (r) => r.round_name == ${round_name:doublequote})\n  |> filter(fn: (r) => r.iteration_name == ${iteration_name:doublequote})\n  |> filter(fn: (r) => r.target == ${target:doublequote})\n  |> filter(fn: (r) => r._field == \"status\")\n  |> last()\n  |> keep(columns: [\"_time\", \"_value\", \"_field\"])"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "string",
+          "noValue": "Not finalized",
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "#50d199"
+          },
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "Success": {
+                  "text": "Success",
+                  "color": "#50d199"
+                },
+                "Completed": {
+                  "text": "Completed",
+                  "color": "#50d199"
+                },
+                "Failed": {
+                  "text": "Failed",
+                  "color": "#f87171"
+                },
+                "Cancelled": {
+                  "text": "Cancelled",
+                  "color": "#f59e0b"
+                },
+                "Terminated": {
+                  "text": "Terminated",
+                  "color": "#f87171"
+                },
+                "Skipped": {
+                  "text": "Skipped",
+                  "color": "#f59e0b"
+                }
+              }
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "value",
+        "justifyMode": "auto",
+        "orientation": "horizontal",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "/^status$/",
+          "values": false
+        },
+        "wideLayout": true
+      }
+    },
+    {
+      "id": 9,
+      "title": "Windowed response time",
+      "type": "timeseries",
+      "datasource": {
+        "type": "influxdb",
+        "uid": "${datasource}"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 6,
+        "w": 24,
+        "h": 9
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "${datasource}"
+          },
+          "query": "import \"regexp\"\ntargetOrigin = regexp.replaceAllString(r: /^(https?:\\/\\/[^\\/]+).*$/, v: ${target:doublequote}, t: \"$1\")\nfrom(bucket: ${bucket:doublequote})\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"windowed_duration\")\n  |> filter(fn: (r) => r.plan_name == ${plan_name:doublequote})\n  |> filter(fn: (r) => r.round_name == ${round_name:doublequote})\n  |> filter(fn: (r) => r.iteration_name == ${iteration_name:doublequote})\n  |> filter(fn: (r) => r.target == ${target:doublequote} or r.target == targetOrigin)\n  |> filter(fn: (r) => r._field == \"avg\" or r._field == \"p50\" or r._field == \"p90\" or r._field == \"p95\" or r._field == \"p99\" or r._field == \"max\")\n  |> filter(fn: (r) => r.metric == \"total_time\")\n  |> keep(columns: [\"_time\", \"_value\", \"_field\", \"metric\", \"status_code\"])"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ms",
+          "noValue": "No data",
+          "color": {
+            "mode": "palette-classic"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "linear",
+            "lineWidth": 2,
+            "fillOpacity": 8,
+            "showPoints": "never",
+            "spanNulls": false,
+            "axisBorderShow": false,
+            "axisColorMode": "text",
+            "axisPlacement": "auto",
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "stacking": {
+              "mode": "none",
+              "group": "A"
+            },
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            }
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "avg"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Average"
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#50d199"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "p50"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "P50"
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#22d3ee"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "p90"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "P90"
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#5794f2"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "p95"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "P95"
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#f59e0b"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "p99"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "P99"
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#f87171"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "max"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Maximum"
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#B877D9"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        },
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "lastNotNull",
+            "max"
+          ],
+          "showLegend": true
+        }
+      }
+    },
+    {
+      "id": 10,
+      "title": "Cumulative response time",
+      "type": "timeseries",
+      "datasource": {
+        "type": "influxdb",
+        "uid": "${datasource}"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 15,
+        "w": 24,
+        "h": 9
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "${datasource}"
+          },
+          "query": "from(bucket: ${bucket:doublequote})\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"cumulative_duration\")\n  |> filter(fn: (r) => r.plan_name == ${plan_name:doublequote})\n  |> filter(fn: (r) => r.round_name == ${round_name:doublequote})\n  |> filter(fn: (r) => r.iteration_name == ${iteration_name:doublequote})\n  |> filter(fn: (r) => r.target == ${target:doublequote})\n  |> filter(fn: (r) => r._field == \"avg\" or r._field == \"p50\" or r._field == \"p90\" or r._field == \"p95\" or r._field == \"p99\" or r._field == \"max\")\n  |> filter(fn: (r) => r.metric == \"total_time\")\n  |> keep(columns: [\"_time\", \"_value\", \"_field\", \"metric\", \"status_code\"])"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ms",
+          "noValue": "No data",
+          "color": {
+            "mode": "palette-classic"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "linear",
+            "lineWidth": 2,
+            "fillOpacity": 8,
+            "showPoints": "never",
+            "spanNulls": false,
+            "axisBorderShow": false,
+            "axisColorMode": "text",
+            "axisPlacement": "auto",
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "stacking": {
+              "mode": "none",
+              "group": "A"
+            },
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            }
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "avg"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Average"
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#50d199"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "p50"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "P50"
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#22d3ee"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "p90"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "P90"
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#5794f2"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "p95"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "P95"
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#f59e0b"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "p99"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "P99"
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#f87171"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "max"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "Maximum"
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#B877D9"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        },
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "lastNotNull",
+            "max"
+          ],
+          "showLegend": true
+        }
+      }
+    },
+    {
+      "id": 11,
+      "title": "Request timing breakdown",
+      "type": "timeseries",
+      "datasource": {
+        "type": "influxdb",
+        "uid": "${datasource}"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 24,
+        "w": 24,
+        "h": 8
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "${datasource}"
+          },
+          "query": "import \"regexp\"\ntargetOrigin = regexp.replaceAllString(r: /^(https?:\\/\\/[^\\/]+).*$/, v: ${target:doublequote}, t: \"$1\")\nfrom(bucket: ${bucket:doublequote})\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"windowed_duration\")\n  |> filter(fn: (r) => r.plan_name == ${plan_name:doublequote})\n  |> filter(fn: (r) => r.round_name == ${round_name:doublequote})\n  |> filter(fn: (r) => r.iteration_name == ${iteration_name:doublequote})\n  |> filter(fn: (r) => r.target == ${target:doublequote} or r.target == targetOrigin)\n  |> filter(fn: (r) => r._field == \"avg\")\n  |> filter(fn: (r) => r.metric != \"total_time\" and r.metric !~ /^server_time/)\n  |> keep(columns: [\"_time\", \"_value\", \"_field\", \"metric\", \"status_code\"])"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ms",
+          "noValue": "No data",
+          "color": {
+            "mode": "palette-classic"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "linear",
+            "lineWidth": 2,
+            "fillOpacity": 8,
+            "showPoints": "never",
+            "spanNulls": false,
+            "axisBorderShow": false,
+            "axisColorMode": "text",
+            "axisPlacement": "auto",
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "stacking": {
+              "mode": "none",
+              "group": "A"
+            },
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            }
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        },
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "lastNotNull",
+            "max"
+          ],
+          "showLegend": true
+        }
+      }
+    }
+  ],
+  "annotations": {
+    "list": [
+      {
+        "name": "Watchdog cooling",
+        "datasource": {
+          "type": "influxdb",
+          "uid": "${datasource}"
+        },
+        "enable": true,
+        "hide": false,
+        "iconColor": "#f59e0b",
+        "target": {
+          "refId": "Cooling",
+          "query": "import \"regexp\"\ntargetOrigin = regexp.replaceAllString(r: /^(https?:\\/\\/[^\\/]+).*$/, v: ${target:doublequote}, t: \"$1\")\nfrom(bucket: ${bucket:doublequote})\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"windowed_cooling\")\n  |> filter(fn: (r) => r.plan_name == ${plan_name:doublequote})\n  |> filter(fn: (r) => r.round_name == ${round_name:doublequote})\n  |> filter(fn: (r) => r.iteration_name == ${iteration_name:doublequote})\n  |> filter(fn: (r) => r.target == ${target:doublequote} or r.target == targetOrigin)\n  |> filter(fn: (r) => r.source == \"Watchdog\")\n  |> pivot(rowKey: [\"_time\"], columnKey: [\"_field\"], valueColumn: \"_value\")\n  |> map(fn: (r) => ({_time: time(v: r.start_ns), timeEnd: time(v: r.end_ns), text: (if exists r.machine then r.machine else \"Local / legacy\") + \" | \" + (if exists r.node then r.node else \"\") + \" | \" + (if exists r.reason then r.reason else \"Resource pressure\"), tags: \"Watchdog\"}))\n  |> group()\n  |> keep(columns: [\"_time\", \"timeEnd\", \"text\", \"tags\"])"
+        }
+      }
+    ]
+  }
+}

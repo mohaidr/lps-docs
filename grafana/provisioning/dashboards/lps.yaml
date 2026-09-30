@@ -1,0 +1,13 @@
+apiVersion: 1
+providers:
+  - name: LPS
+    orgId: 1
+    folder: LPS
+    folderUid: lps
+    type: file
+    disableDeletion: false
+    allowUiUpdates: false
+    updateIntervalSeconds: 10
+    options:
+      path: /var/lib/grafana/dashboards
+      foldersFromFilesStructure: false

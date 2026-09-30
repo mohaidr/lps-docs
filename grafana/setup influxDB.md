@@ -1,5 +1,9 @@
 # InfluxDB Integration
 
+For dashboard imports, LPS configuration, and access from other devices, see
+[Integrating LPS with Grafana](../grafana-integration.md). The six importable
+dashboard templates are in [resources](../resources/).
+
 The **LPS Tool** supports InfluxDB integration starting from version **3.0.3.1** and above. This feature allows you to automatically export performance testing metrics to your InfluxDB instance for advanced analytics, long-term storage, and visualization using tools like Grafana.
 
 ## Overview
@@ -22,7 +26,78 @@ Before configuring InfluxDB integration, ensure you have:
 4. **Organization and bucket** configured in InfluxDB
 
 
-## LPS Configuration
+## Local Grafana Workspace
+
+The dashboard mirrors the built-in LPS views with shared summary tiles and linked
+Requests, Latency, Server Latency, Data Transfer, Responses, and Performance Report
+pages. Navigation retains the selected run, round, iteration, endpoint, and time range.
+
+With Docker Desktop, Node.js 22.12 or later, and the `influxdb:2.7` and
+`grafana/grafana:latest` images installed, run from this directory:
+
+```powershell
+node start-local.mjs
+```
+
+- Grafana: http://127.0.0.1:3300/d/lps-requests
+- InfluxDB: http://127.0.0.1:8087
+- Organization: `LPS`; bucket: `LPS_Metrics`.
+- Credentials are generated in the Git-ignored `.env` file. Admin username is
+  `lps`; password keys are `LPS_GRAFANA_PASSWORD` and `LPS_INFLUX_PASSWORD`.
+- Grafana has anonymous **Viewer** access on localhost and a bucket-scoped
+  **read-only** token. The generated `LPS_INFLUX_WRITE_TOKEN` is for LPS export.
+- Containers and named volumes belong to the separate `lps-grafana` Compose
+  project. Existing Grafana/InfluxDB containers and volumes are not changed.
+- Data retention is seven days in this local test stack. Keep `.env` with its
+  volumes; do not regenerate credentials against existing initialized volumes.
+
+In LPS Settings, enable InfluxDB with the URL, organization, and bucket above,
+and enter the write token locally. Settings apply to future runs. An LPS process
+inside another container must use a network-reachable InfluxDB URL instead of
+its own `127.0.0.1`.
+
+Stop without deleting stored data:
+
+```powershell
+docker compose stop
+```
+
+### Verification
+
+```powershell
+node --test dashboard.test.mjs
+node verify-local.mjs --runner C:/path/to/LPS.dll
+```
+
+The verifier writes an explicitly named `Dashboard Fixture` run, tests every panel
+query through Grafana, checks exact summary values, selector isolation, idle data,
+two watchdog machines, and read-only permissions. With `--runner`, it also runs
+60 requests against an ephemeral loopback HTTP server and compares Grafana with
+retained LPS metrics: 54 successful and 6 intentional HTTP 503 failures. The test
+rule intentionally yields `Failed`. No external load target is contacted.
+
+The private `.local/verification.json` report contains a time-bounded fixture URL
+and real-run selectors. Fixture cooling and server timing are synthetic; the
+real-run counters and status are exported by LPS. Without `--runner`, only the
+fixture/query checks run. Repeated verification adds separately named fixture runs.
+
+### Data Semantics
+
+- Summary tiles use the latest cumulative snapshot in the selected time range,
+  never the sum of repeated cumulative snapshots. Error rate is calculated from
+  failed/sent counters to avoid precision lost in the exported ratio, then formatted
+  as a percentage; transfer values are bytes and bytes/second.
+- Each selection is one endpoint within one iteration, round, and run.
+  Percentiles are not averaged across endpoints or windows. Exact host-wide
+  percentiles cannot be reconstructed from the current InfluxDB export.
+- Windowed charts accept both origin-only and full-URL `target` tags, preserving
+  compatibility with current LPS exports; cumulative queries match the full target.
+- Watchdog region annotations retain machine, node, reason, and start/end times.
+  Batch cooldown annotations remain hidden, matching the built-in dashboard.
+- Missing data remains missing rather than becoming zero. Server Latency requires
+  server-timing response headers; an unfinalized run has no final status yet.
+
+## LPS CLI Configuration
 
 Use the LPS CLI commands to configure InfluxDB integration:
 
@@ -34,7 +109,7 @@ lps influxdb -ie true -iu "<InfluxDB_URL>" -it "<Your-Token>" -io "<ORG>" -ib "<
 
 ## See Your Metrics
 
-To view your metrics, you can either import the [Grafana Dashboard Template](https://github.com/mohaidr/lps-docs/blob/main/grafana/LPS%20Grafana%20%20Dashboard.json) to quickly set up a pre-configured Grafana dashboard, or run custom queries directly within InfluxDB.
+To view your metrics, import the six [Grafana dashboard templates](../resources/) using the [integration guide](../grafana-integration.md), or run custom queries directly within InfluxDB.
 
 ### Grafana Dashboard Setup
 
@@ -45,23 +120,29 @@ Before importing the dashboard template, ensure the following requirements are m
 | Requirement | Description |
 |-------------|-------------|
 | **InfluxDB Data Source** | An InfluxDB data source must be configured in Grafana with Flux query language enabled |
-| **Bucket Name** | The dashboard expects a bucket named `LPS_Metrics`. If your bucket has a different name, update the queries accordingly |
+| **Bucket Name** | Defaults to `LPS_Metrics`; the Bucket selector can change it without editing queries |
 | **InfluxDB Version** | InfluxDB 2.x is required (the dashboard uses Flux queries) |
 | **Grafana Version** | Grafana 12.3.1 or a compatible version |
 
 #### Import Steps
 
 1. In Grafana, go to **Dashboards** → **Import**
-2. Upload the JSON file or paste its contents
-3. When prompted, select your InfluxDB data source for the `DS_INFLUXDB` variable
-4. Click **Import**
+2. Import all six JSON files in [resources](../resources/), starting with [Requests](../resources/lps-requests.json). Preserve their dashboard UIDs so navigation links work.
+3. Select your Flux InfluxDB data source using the dashboard's Data source selector
+4. Select the bucket, run, round, iteration, and target; use the top links to change views
+
+The local Compose setup provisions all six views automatically. No Grafana panel
+plugins are required. Dashboard sources are generated by `build-dashboard.mjs`;
+rerun `node start-local.mjs` after editing it to rebuild [resources](../resources/)
+and reload the local views. Keep the `grafana` and `resources` folders together.
+Older copies under `grafana` are retained for already-running bind mounts; new
+imports and provisioning use `resources`. Applying the new mount may recreate
+Grafana, so schedule that update around active use.
 
 #### Using a Different Bucket Name
 
-If your bucket is not named `LPS_Metrics`, you have two options:
-
-- **Before Import**: Open the JSON file and replace all occurrences of `"LPS_Metrics"` with your bucket name
-- **After Import**: Edit each panel's query and update the bucket name
+Change the **Bucket** selector at the top of the dashboard. The data source's
+token must have read access to that bucket.
 
 ---
 
@@ -122,7 +203,7 @@ Cumulative request counts and rates.
 | `max_concurrent_requests` | int | Maximum concurrent requests observed |
 | `requests_per_second` | float | Average requests per second |
 | `requests_rate_per_cooldown` | float | Request rate per cooldown window |
-| `error_rate` | float | Error rate percentage |
+| `error_rate` | float | Error ratio (0 to 1), displayed as a percentage |
 | `time_elapsed_ms` | float | Total elapsed time in milliseconds |
 
 ---

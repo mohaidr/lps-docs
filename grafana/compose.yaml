@@ -1,0 +1,53 @@
+name: lps-grafana
+services:
+  influxdb:
+    image: influxdb:2.7
+    ports:
+      - "127.0.0.1:8087:8086"
+    environment:
+      DOCKER_INFLUXDB_INIT_MODE: setup
+      DOCKER_INFLUXDB_INIT_USERNAME: lps
+      DOCKER_INFLUXDB_INIT_PASSWORD: ${LPS_INFLUX_PASSWORD:?Run start-local.mjs first}
+      DOCKER_INFLUXDB_INIT_ADMIN_TOKEN: ${LPS_INFLUX_ADMIN_TOKEN:?Run start-local.mjs first}
+      DOCKER_INFLUXDB_INIT_ORG: LPS
+      DOCKER_INFLUXDB_INIT_BUCKET: LPS_Metrics
+      DOCKER_INFLUXDB_INIT_RETENTION: 168h
+    volumes:
+      - influx-data:/var/lib/influxdb2
+      - influx-config:/etc/influxdb2
+    healthcheck:
+      test: ["CMD", "influx", "ping", "--host", "http://localhost:8086"]
+      interval: 2s
+      timeout: 3s
+      retries: 60
+      start_period: 10s
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "127.0.0.1:3300:3000"
+    environment:
+      GF_SECURITY_ADMIN_USER: lps
+      GF_SECURITY_ADMIN_PASSWORD: ${LPS_GRAFANA_PASSWORD:?Run start-local.mjs first}
+      GF_AUTH_ANONYMOUS_ENABLED: "true"
+      GF_AUTH_ANONYMOUS_ORG_ROLE: Viewer
+      GF_USERS_ALLOW_SIGN_UP: "false"
+      GF_ANALYTICS_REPORTING_ENABLED: "false"
+      GF_ANALYTICS_CHECK_FOR_UPDATES: "false"
+      GF_DASHBOARDS_MIN_REFRESH_INTERVAL: 5s
+      LPS_INFLUX_READ_TOKEN: ${LPS_INFLUX_READ_TOKEN:?Run start-local.mjs first}
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./provisioning:/etc/grafana/provisioning:ro
+      - ../resources:/var/lib/grafana/dashboards:ro
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://127.0.0.1:3000/api/health"]
+      interval: 2s
+      timeout: 3s
+      retries: 60
+    depends_on:
+      influxdb:
+        condition: service_healthy
+volumes:
+  influx-data:
+  influx-config:
+  grafana-data:
