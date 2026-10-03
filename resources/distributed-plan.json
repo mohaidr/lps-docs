@@ -1,0 +1,21 @@
+{
+  "Name": "Distributed demo",
+  "Rounds": [
+    {
+      "Name": "Round",
+      "NumberOfClients": "1",
+      "RunClientsSequentially": "true",
+      "Iterations": [
+        {
+          "Name": "Request",
+          "Mode": "R",
+          "RequestCount": "10",
+          "HttpRequest": {
+            "URL": "http://127.0.0.1:8119/load",
+            "HttpMethod": "GET"
+          }
+        }
+      ]
+    }
+  ]
+}
