@@ -94,7 +94,7 @@ lps --url https://www.example.com -rc 1000 --httpmethod "POST" --payload "URL:ht
 Explore full docs in the [📖 LPS Docs Repo](https://github.com/mohaidr/lps-docs/tree/main)
 
 ### Key Sections:
-- [Distributed Worker Testing](distributed-worker-testing.md) - Local verification and [multi-machine commands](distributed-worker-testing.md#multi-machine-commands) for persistent and legacy workers, port migration, TLS, and firewall setup
+- [Distributed Worker Testing](articles/9.DistributedLoadTesting.md) - New and legacy workflows, multi-machine commands, master port compatibility, and worker endpoint setup
 - [Grafana Integration](grafana-integration.md) - Dashboard templates, InfluxDB configuration, and access from other devices
 - 🧾 [Commands](https://github.com/mohaidr/lps-docs/blob/main/articles/1.Commands.md)
 - 📄 [Articles](https://github.com/mohaidr/lps-docs/tree/main/articles)
