@@ -94,6 +94,7 @@ lps --url https://www.example.com -rc 1000 --httpmethod "POST" --payload "URL:ht
 Explore full docs in the [📖 LPS Docs Repo](https://github.com/mohaidr/lps-docs/tree/main)
 
 ### Key Sections:
+- [GUI Workspace](articles/20.GUI.md) - Create tests, preview staged workloads, configure settings, and review runs in the browser
 - [Distributed Worker Testing](articles/9.DistributedLoadTesting.md) - New and legacy workflows, multi-machine commands, master port compatibility, and worker endpoint setup
 - [Grafana Integration](grafana-integration.md) - Dashboard templates, InfluxDB configuration, and access from other devices
 - 🧾 [Commands](https://github.com/mohaidr/lps-docs/blob/main/articles/1.Commands.md)
