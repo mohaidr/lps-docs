@@ -3,8 +3,9 @@
 LPS exports test metrics to InfluxDB. Grafana reads those metrics and displays
 the six linked dashboards provided in the [resources folder](https://github.com/mohaidr/lps-docs/tree/main/resources).
 
-> **Version compatibility:** These templates apply to the current LPS preview
-> release, **3.0.6.82-preview**. Earlier versions may not export all metrics
+> **Version compatibility:** Support for these templates is generally available
+> (GA) starting with **LPS 3.0.6.9**. Use **3.0.6.9** or a later stable release
+> to export all expected metrics. Earlier versions may not export all metrics
 > required by these dashboards.
 
 ```mermaid
